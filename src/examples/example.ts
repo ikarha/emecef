@@ -10,13 +10,9 @@ async function main(): Promise<void> {
     const infoService = new InfoService();
 
     try {
-        // Vérifier le statut
-        const status = await billingService.getStatus();
-        console.log('Statut API:', status);
-
         // Créer une facture
         const invoiceData: InvoiceRequestDataDto = {
-            ifu: '9999900000001',
+            ifu: '9999900000001', // Numéro d'identification fiscale de l'entreprise
             type: InvoiceTypeEnum.FV,
             items: [
                 {
@@ -33,8 +29,8 @@ async function main(): Promise<void> {
                 }
             ],
             client: {
-                contact: '45661122',
-                ifu: '9999900000002',
+                contact: '0145661122',
+                ifu: '9999900000002', // Numéro d'identification fiscale du client
                 name: 'Nom du client',
                 address: 'Rue d\'ananas 23'
             },
@@ -61,7 +57,7 @@ async function main(): Promise<void> {
         console.log('Détails facture:', details);
 
         // Récupérer les informations sur les e-MCF
-        const emcfInfo = await infoService.getEmcfInfo();
+        const emcfInfo = await infoService.getEmeCefInfo();
         console.log('Info e-MCF:', emcfInfo);
 
         // Récupérer les groupes de taxation
@@ -76,7 +72,7 @@ async function main(): Promise<void> {
         const paymentTypes = await infoService.getPaymentTypes();
         console.log('Types de paiement:', paymentTypes);
     } catch (error) {
-        console.error('Erreur:', error instanceof Error ? error.message : 'Erreur inconnue');
+        console.error('Erreur: ', error instanceof Error ? error.message : 'Erreur inconnue');
     }
 }
 

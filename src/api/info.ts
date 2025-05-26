@@ -14,7 +14,7 @@ export class InfoService {
         });
     }
 
-    public async getEmcfInfo(): Promise<InfoResponseDto> {
+    public async getEmeCefInfo(): Promise<InfoResponseDto> {
         try {
             const response = await this.axiosInstance.get<InfoResponseDto>('/status');
             return response.data;

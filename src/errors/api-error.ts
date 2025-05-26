@@ -4,13 +4,13 @@ export class ApiError extends Error {
         message: string
     ) {
         super(message);
-        this.name = 'ApiError';
+        this.name = 'E-MeCef ApiError ';
     }
 
     static fromResponse(error: any): ApiError {
         if (error.response?.data) {
-            const { errorCode, errorDesc } = error.response.data;
-            return new ApiError(errorCode, errorDesc || 'Unknown API error');
+            const { status, title, } = error.response.data;
+            return new ApiError(status, title || 'Unknown E-MeCef API error');
         }
         return new ApiError(undefined, `Network Error: ${error.message}`);
     }

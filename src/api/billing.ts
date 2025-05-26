@@ -20,15 +20,6 @@ export class BillingService {
         });
     }
 
-    public async getStatus(): Promise<StatusResponseDto> {
-        try {
-            const response = await this.axiosInstance.get<StatusResponseDto>('/');
-            return response.data;
-        } catch (error) {
-            throw ApiError.fromResponse(error);
-        }
-    }
-
     public async createInvoice(data: InvoiceRequestDataDto): Promise<InvoiceResponseDataDto> {
         try {
             const response = await this.axiosInstance.post<InvoiceResponseDataDto>('/', data);
