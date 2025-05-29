@@ -1,5 +1,5 @@
 {
-  "name": "emecef",
+  "name": "@ikarha/emecef",
   "version": "1.0.0",
   "description": "Node.js client library for interacting with the Benin e-MCF API for normalized invoicing",
   "main": "dist/index.js",
@@ -9,7 +9,9 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
+    "run-example": "node dist/examples/example.js",
     "test": "jest",
+    "test-coverage": "jest --coverage",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -35,11 +37,12 @@
     "dotenv": "^16.4.5"
   },
   "devDependencies": {
-    "typescript": "^5.5.4",
     "@types/jest": "^29.5.12",
     "@types/node": "^22.7.4",
     "jest": "^29.7.0",
-    "ts-jest": "^29.2.5"
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.5.4",
+    "axios-mock-adapter": "^2.1.0"
   },
   "private": true,
   "repository": {

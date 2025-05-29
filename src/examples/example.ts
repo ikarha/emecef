@@ -5,14 +5,37 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 async function main(): Promise<void> {
-    // Les variables d'environnement EMCF_BASE_URL et EMCF_TOKEN doivent être définies
+    // Les variables d'environnement EMECEF_BASE_URL et EMECEF_TOKEN doivent être définies
     const billingService = new BillingService();
     const infoService = new InfoService();
 
     try {
+
+
+        // Récupérer les informations sur les e-MCF
+        const emcfInfo = await infoService.getEmeCefInfo();
+        console.log('Info e-MCF:', emcfInfo);
+
+        // Récupérer les groupes de taxation
+        const taxGroups = await infoService.getTaxGroups();
+        console.log('Groupes de taxation:', taxGroups);
+
+        // Récupérer les types de factures
+        const invoiceTypes = await infoService.getInvoiceTypes();
+        console.log('Types de factures:', invoiceTypes);
+
+        // Récupérer les types de paiement
+        const paymentTypes = await infoService.getPaymentTypes();
+        console.log('Types de paiement:', paymentTypes);
+
+
+        // Vérifier le statut de l'API
+        const status = await billingService.getInvoiceStatus()
+        console.log('Statut de l\'API:', status);
+
         // Créer une facture
         const invoiceData: InvoiceRequestDataDto = {
-            ifu: '9999900000001', // Numéro d'identification fiscale de l'entreprise
+            ifu: '3200700067314', // Numéro d'identification fiscale de l'entreprise
             type: InvoiceTypeEnum.FV,
             items: [
                 {
@@ -55,22 +78,6 @@ async function main(): Promise<void> {
         // Récupérer les détails de la facture
         const details = await billingService.getInvoiceDetails(invoiceResponse.uid);
         console.log('Détails facture:', details);
-
-        // Récupérer les informations sur les e-MCF
-        const emcfInfo = await infoService.getEmeCefInfo();
-        console.log('Info e-MCF:', emcfInfo);
-
-        // Récupérer les groupes de taxation
-        const taxGroups = await infoService.getTaxGroups();
-        console.log('Groupes de taxation:', taxGroups);
-
-        // Récupérer les types de factures
-        const invoiceTypes = await infoService.getInvoiceTypes();
-        console.log('Types de factures:', invoiceTypes);
-
-        // Récupérer les types de paiement
-        const paymentTypes = await infoService.getPaymentTypes();
-        console.log('Types de paiement:', paymentTypes);
     } catch (error) {
         console.error('Erreur: ', error instanceof Error ? error.message : 'Erreur inconnue');
     }

@@ -1,6 +1,6 @@
 import axios, {AxiosInstance} from 'axios';
 import {getConfig} from './config';
-import {ApiError} from '../errors/api-error';
+import {EmecfApiError} from '../errors/api-error';
 import {
     InvoiceDetailsDto,
     InvoiceRequestDataDto,
@@ -20,30 +20,39 @@ export class BillingService {
         });
     }
 
+    public async getInvoiceStatus(): Promise<StatusResponseDto> {
+        try {
+            const response = await this.axiosInstance.get<StatusResponseDto>('/');
+            return EmecfApiError.checkSuccessResponse(response)
+        } catch (error) {
+            throw EmecfApiError.fromResponse(error);
+        }
+    }
+
     public async createInvoice(data: InvoiceRequestDataDto): Promise<InvoiceResponseDataDto> {
         try {
             const response = await this.axiosInstance.post<InvoiceResponseDataDto>('/', data);
-            return response.data;
+            return EmecfApiError.checkSuccessResponse(response)
         } catch (error) {
-            throw ApiError.fromResponse(error);
+            throw EmecfApiError.fromResponse(error);
         }
     }
 
     public async finalizeInvoice(uid: string, action: 'confirm' | 'annuler'): Promise<SecurityElementsDto> {
         try {
             const response = await this.axiosInstance.put<SecurityElementsDto>(`/${uid}/${action}`);
-            return response.data;
+            return EmecfApiError.checkSuccessResponse(response)
         } catch (error) {
-            throw ApiError.fromResponse(error);
+            throw EmecfApiError.fromResponse(error);
         }
     }
 
     public async getInvoiceDetails(uid: string): Promise<InvoiceDetailsDto> {
         try {
             const response = await this.axiosInstance.get<InvoiceDetailsDto>(`/${uid}`);
-            return response.data;
+            return EmecfApiError.checkSuccessResponse(response)
         } catch (error) {
-            throw ApiError.fromResponse(error);
+            throw EmecfApiError.fromResponse(error);
         }
     }
 }

@@ -21,9 +21,8 @@ This library provides a simple and typed interface to manage invoices and retrie
 Install the package using npm:
 
 ```bash
- npm install emecef
+ npm install @ikarha/emecef
 ```
-
 
 ### Prerequisites
 
@@ -38,8 +37,8 @@ The library uses environment variables for configuration. Create a .env file in 
 
 # .example.env file
 
-EMCF_BASE_URL=https://developer.impots.bj/sygmef-emcf/api
-EMCF_TOKEN=your-jwt-token
+EMECEF_BASE_URL=https://developer.impots.bj/sygmef-emcf/api
+EMECEF_TOKEN=your-jwt-token
 ```
 
 Ensure you have dotenv installed and load it at the start of your application:
@@ -61,7 +60,7 @@ dotenv.config();
 Initialize the Services
 
 ```typescript
-import { BillingService, InfoService } from 'emecef';
+import { BillingService, InfoService } from '@ikarha/emecef';
 
 // Initialize services (environment variables must be set)
 const billingService = new BillingService();
@@ -71,7 +70,7 @@ const infoService = new InfoService();
 #### Example: Create and Finalize an Invoice
 
 ```typescript
-import { BillingService } from 'emcf-api-client';
+import { BillingService } from '@ikarha/emecef';
 import { InvoiceRequestDataDto, InvoiceTypeEnum, PaymentTypeEnum, TaxGroupTypeEnum } from 'emcf-api-client/dist/types/billing';
 import * as dotenv from 'dotenv';
 
@@ -137,13 +136,13 @@ main().catch(console.error);
 
 #### Available Methods
 - BillingService
-  - getStatus(): Retrieves the API status and pending invoice requests.
+  - getInvoiceStatus(): Retrieves the API status and pending invoice requests.
   - createInvoice(data: InvoiceRequestDataDto): Submits a new invoice and retrieves calculated totals.
   - finalizeInvoice(uid: string, action: 'confirm' | 'annuler'): Confirms or cancels an invoice.
   - getInvoiceDetails(uid: string): Retrieves details of a pending invoice.
 
 - InfoService 
-  - getEmcfInfo(): Retrieves information about e-MCF instances.
+  - getEmeCefInfo(): Retrieves information about e-MCF instances.
   - getTaxGroups(): Retrieves available tax groups and their rates.
   - getInvoiceTypes(): Retrieves available invoice types.
   - getPaymentTypes(): Retrieves available payment types.
@@ -152,12 +151,12 @@ main().catch(console.error);
 
 | Variable      | Description                          | Required | Example                                     |
 |---------------|--------------------------------------|----------|---------------------------------------------|
-| EMCF_BASE_URL | Base URL of the e-MCF API            | Yes      | https://developer.impots.bj/sygmef-emcf/api |
-| EMCF_TOKEN    | JWT token for API authentication     | Yes      | your-jwt-token                              |
+| EMECEF_BASE_URL | Base URL of the e-MCF API            | Yes      | https://developer.impots.bj/sygmef-emcf/api |
+| EMECEF_TOKEN    | JWT token for API authentication     | Yes      | your-jwt-token                              |
 
 
 ### Error Handling
-The library throws ApiError instances with meaningful error messages based on the API's error codes (e.g., maximum pending invoices exceeded, invalid invoice type). Check the error documentation in the e-MCF API specification for details.
+The library throws ApiError instances with meaningful error messages based on the API's error codes. Check the error documentation in the e-MCF API specification for details.
 
 
 ### Development
