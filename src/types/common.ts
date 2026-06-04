@@ -1,8 +1,5 @@
-export interface ApiConfig {
-    baseUrl: string;
-    headers: {
-        'Content-Type': string;
-        'Accept': string;
-        'Authorization'?: string;
-    };
-}
+/**
+ * @deprecated Utilisez EmecefConfig depuis '@ikarha/emecef' à la place.
+ * Ce fichier sera supprimé dans la prochaine version majeure.
+ */
+export type {EmecefConfig as ApiConfig} from '../api/config';

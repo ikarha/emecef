@@ -1,189 +1,217 @@
-## eMCF API Client
-A TypeScript client library for interacting with the e-MCF (MACHINES ELECTRONIQUES CERTIFIEES DE FACTURATION) API for normalized invoicing.
-This library provides a simple and typed interface to manage invoices and retrieve information from the e-MCF API.
+## @ikarha/emecef
 
-### Features
-
-- Billing API: 
-  - Create, 
-  - finalize, 
-  - and retrieve invoice details.
-- Info API: 
-  - Fetch e-MCF status, 
-  - tax groups, 
-  - invoice types, 
-  - and payment types.
-- TypeScript Support: Fully typed with TypeScript interfaces for robust development.
-      Environment Configuration: Configurable via environment variables for security and flexibility.
-      Error Handling: Comprehensive error handling with meaningful messages.
+Client TypeScript pour l'API e-MCF (Machines Électroniques Certifiées de Facturation) de la DGI Bénin.
 
 ### Installation
-Install the package using npm:
 
 ```bash
- npm install @ikarha/emecef
+npm install @ikarha/emecef
 ```
 
-### Prerequisites
+### Prérequis
 
-- Node.js (>= 14.x)
-- A valid JWT token provided by the DGI for e-MCF API access
-- An active internet connection :)
+- Node.js >= 14.x
+- Un token JWT valide fourni par la DGI pour l'accès à l'API e-MCF
 
 ### Configuration
-The library uses environment variables for configuration. Create a .env file in your project root based on the provided .env.example:
+
+Deux modes sont disponibles — les paramètres explicites ont priorité sur les variables d'environnement.
+
+**Via paramètres (recommandé)** — idéal avec NestJS, Express ou tout framework qui injecte la config :
+
+```typescript
+import { EmecefClient } from '@ikarha/emecef';
+
+const client = new EmecefClient({
+  baseUrl: 'https://developper.impots.bj/sygmef-emcf/api',
+  token: 'votre-token-jwt',
+  timeout: 30000, // optionnel, défaut : 30 000 ms
+});
+```
+
+**Via variables d'environnement** :
 
 ```bash
-
-# .example.env file
-
-EMECEF_BASE_URL=https://developer.impots.bj/sygmef-emcf/api
-EMECEF_TOKEN=your-jwt-token
+# .env
+EMECEF_BASE_URL=https://developper.impots.bj/sygmef-emcf/api
+EMECEF_TOKEN=votre-token-jwt
 ```
 
-Ensure you have dotenv installed and load it at the start of your application:
-
-```bash
-npm install dotenv
-````
-
-Then, load the environment variables in your application:
-
 ```typescript
+import { EmecefClient } from '@ikarha/emecef';
 
-import * as dotenv from 'dotenv';
-dotenv.config();
-
+const client = new EmecefClient(); // lit EMECEF_BASE_URL et EMECEF_TOKEN
 ```
 
-### Usage
-Initialize the Services
+### Utilisation
+
+#### Cas d'usage principal : créer et confirmer une facture en une étape
 
 ```typescript
-import { BillingService, InfoService } from '@ikarha/emecef';
+import {
+  EmecefClient,
+  InvoiceRequestDataDto,
+  InvoiceTypeEnum,
+  PaymentTypeEnum,
+  TaxGroupTypeEnum,
+  NormalizedInvoiceResult,
+} from '@ikarha/emecef';
 
-// Initialize services (environment variables must be set)
-const billingService = new BillingService();
-const infoService = new InfoService();
+const client = new EmecefClient({ baseUrl: '...', token: '...' });
+
+const data: InvoiceRequestDataDto = {
+  ifu: '9999900000001',
+  type: InvoiceTypeEnum.FV,
+  items: [
+    { name: 'Jus d\'orange', price: 1800, quantity: 2, taxGroup: TaxGroupTypeEnum.B },
+  ],
+  operator: { name: 'Jacques' },
+  payment: [{ name: PaymentTypeEnum.ESPECES, amount: 1800 }],
+};
+
+const result: NormalizedInvoiceResult = await client.billing.normalizeInvoice(data);
+console.log('UID :', result.invoice.uid);
+console.log('Total :', result.invoice.total);
+console.log('QR Code :', result.security.qrCode);
+console.log('Code MECeF :', result.security.codeMECeFDGI);
 ```
 
-#### Example: Create and Finalize an Invoice
+#### Étapes séparées (create / confirm / cancel)
 
 ```typescript
-import { BillingService } from '@ikarha/emecef';
-import { InvoiceRequestDataDto, InvoiceTypeEnum, PaymentTypeEnum, TaxGroupTypeEnum } from 'emcf-api-client/dist/types/billing';
-import * as dotenv from 'dotenv';
+// Créer
+const invoice = await client.billing.createInvoice(data);
 
-dotenv.config();
+// Confirmer
+const confirmed = await client.billing.confirmInvoice(invoice.uid);
 
-async function main() {
-const billingService = new BillingService();
+// Ou annuler
+const cancelled = await client.billing.cancelInvoice(invoice.uid);
+
+// Détails d'une facture en attente
+const details = await client.billing.getInvoiceDetails(invoice.uid);
+```
+
+#### Informations e-MCF
+
+```typescript
+const info         = await client.info.getEmeCefInfo();
+const taxGroups    = await client.info.getTaxGroups();
+const invoiceTypes = await client.info.getInvoiceTypes();
+const paymentTypes = await client.info.getPaymentTypes();
+const status       = await client.billing.getInvoiceStatus();
+```
+
+### Gestion des erreurs
+
+La librairie lève uniquement des instances de `EmecfApiError`, utilisables avec `instanceof` :
+
+```typescript
+import { EmecfApiError } from '@ikarha/emecef';
 
 try {
-// Check API status
-const status = await billingService.getStatus();
-console.log('API Status:', status);
-
-    // Create an invoice
-    const invoiceData: InvoiceRequestDataDto = {
-      ifu: '9999900000001',
-      type: InvoiceTypeEnum.FV,
-      items: [
-        {
-          name: 'Jus d\'orange',
-          price: 1800,
-          quantity: 2,
-          taxGroup: TaxGroupTypeEnum.B
-        },
-        {
-          name: 'Lait 1/1 EX',
-          price: 450,
-          quantity: 3,
-          taxGroup: TaxGroupTypeEnum.A
-        }
-      ],
-      client: {
-        contact: '45661122',
-        ifu: '9999900000002',
-        name: 'Nom du client',
-        address: 'Rue d\'ananas 23'
-      },
-      operator: {
-        id: '',
-        name: 'Jacques'
-      },
-      payment: [
-        {
-          name: PaymentTypeEnum.ESPECES,
-          amount: 4950
-        }
-      ]
-    };
-    const invoiceResponse = await billingService.createInvoice(invoiceData);
-    console.log('Invoice Response:', invoiceResponse);
-
-    // Finalize the invoice
-    const finalizeResponse = await billingService.finalizeInvoice(invoiceResponse.uid, 'confirm');
-    console.log('Finalization:', finalizeResponse);
+  await client.billing.normalizeInvoice(data);
 } catch (error) {
-console.error('Error:', error instanceof Error ? error.message : 'Unknown error');
+  if (error instanceof EmecfApiError) {
+    console.error(error.details.code);        // ex. '8', 'NETWORK_ERROR'
+    console.error(error.details.description); // ex. 'La facture doit contenir des articles'
+  }
 }
-}
-
-main().catch(console.error);
 ```
 
+Codes d'erreur notables :
 
-#### Available Methods
-- BillingService
-  - getInvoiceStatus(): Retrieves the API status and pending invoice requests.
-  - createInvoice(data: InvoiceRequestDataDto): Submits a new invoice and retrieves calculated totals.
-  - finalizeInvoice(uid: string, action: 'confirm' | 'annuler'): Confirms or cancels an invoice.
-  - getInvoiceDetails(uid: string): Retrieves details of a pending invoice.
+| Code | Description |
+|---|---|
+| `NETWORK_ERROR` | Pas de réponse du serveur (connexion, timeout) |
+| `BAD_REQUEST` | Requête invalide (400 sans code applicatif) |
+| `INTERNAL_SERVER_ERROR` | Erreur serveur e-MCF (500) |
+| `1` | Nombre maximum de factures en attente dépassé |
+| `3` | Type de facture invalide |
+| `8` | La facture doit contenir des articles |
+| `20` | Facture inexistante ou déjà finalisée/annulée |
+| `99` | Erreur de traitement générique |
 
-- InfoService 
-  - getEmeCefInfo(): Retrieves information about e-MCF instances.
-  - getTaxGroups(): Retrieves available tax groups and their rates.
-  - getInvoiceTypes(): Retrieves available invoice types.
-  - getPaymentTypes(): Retrieves available payment types.
+### Méthodes disponibles
 
-### Environment Variables
+**`client.billing`** (`BillingService`)
 
-| Variable      | Description                          | Required | Example                                     |
-|---------------|--------------------------------------|----------|---------------------------------------------|
-| EMECEF_BASE_URL | Base URL of the e-MCF API            | Yes      | https://developer.impots.bj/sygmef-emcf/api |
-| EMECEF_TOKEN    | JWT token for API authentication     | Yes      | your-jwt-token                              |
+| Méthode | Description |
+|---|---|
+| `normalizeInvoice(data)` | Crée et confirme une facture en une étape *(recommandé)* |
+| `createInvoice(data)` | Soumet une facture, retourne les totaux calculés |
+| `confirmInvoice(uid)` | Confirme une facture en attente, retourne QR code et codeMECeF |
+| `cancelInvoice(uid)` | Annule une facture en attente |
+| `getInvoiceDetails(uid)` | Récupère les détails d'une facture en attente |
+| `getInvoiceStatus()` | Retourne le statut de l'API et les requêtes en attente |
 
+**`client.info`** (`InfoService`)
 
-### Error Handling
-The library throws ApiError instances with meaningful error messages based on the API's error codes. Check the error documentation in the e-MCF API specification for details.
+| Méthode | Description |
+|---|---|
+| `getEmeCefInfo()` | Informations sur les instances e-MCF actives |
+| `getTaxGroups()` | Groupes de taxation et leurs taux |
+| `getInvoiceTypes()` | Types de factures disponibles |
+| `getPaymentTypes()` | Types de paiement disponibles |
 
+### Types exportés
 
-### Development
-#### Build the Project
+Tous les types sont importables directement depuis `@ikarha/emecef` :
+
+```typescript
+import {
+  // Enums
+  InvoiceTypeEnum, AibGroupTypeEnum, TaxGroupTypeEnum,
+  PaymentTypeEnum, InvoiceNatureEnum,
+  // Interfaces request/response
+  InvoiceRequestDataDto, InvoiceResponseDataDto,
+  InvoiceDetailsDto, NormalizedInvoiceResult,
+  ItemDto, ClientDto, OperatorDto, PaymentDto,
+  StatusResponseDto, SecurityElementsDto, PendingRequestDto,
+  // Info
+  InfoResponseDto, EmcfInfoDto, TaxGroupsDto,
+  InvoiceTypeDto, PaymentTypeDto,
+  // Config
+  EmecefConfig,
+  // Erreurs
+  EmecfApiError, EmecfErrorDetails,
+} from '@ikarha/emecef';
+```
+
+### Variables d'environnement
+
+| Variable | Description | Requis |
+|---|---|---|
+| `EMECEF_BASE_URL` | URL de base de l'API e-MCF | Oui (si pas de config explicite) |
+| `EMECEF_TOKEN` | Token JWT d'authentification | Oui (si pas de config explicite) |
+
+### Développement
 
 ```bash
- npm run build
+npm run build        # compile TypeScript → dist/
+npm test             # lance Jest
+npm run test-coverage
+npm run run-example  # exécute src/examples/example.ts
 ```
 
-#### Run Tests
+### Structure du projet
 
-Tests are implemented with Jest. Run them with:
-```bash
-npm test
+```
+src/
+  api/        BillingService, InfoService, config
+  client.ts   EmecefClient (point d'entrée unifié)
+  types/      Interfaces et enums TypeScript
+  errors/     EmecfApiError et codes d'erreur
+  examples/   Exemple d'utilisation complet
+dist/         Fichiers compilés (.js + .d.ts)
 ```
 
-#### Project Structure
+### Ressources
 
-- ```src/api/```: Contains service classes for billing and info APIs.
-- ```src/types/```: TypeScript interfaces for API data transfer objects (DTOs).
-- ```src/errors/```: Custom error handling logic.
-- ```dist/```: Compiled JavaScript and TypeScript declaration files.
+- [CHANGELOG](./CHANGELOG.md) — historique des versions et guide de migration
+- [API e-MCF — Documentation Swagger](https://developper.impots.bj/sygmef-emcf/swagger/index.html)
+- [DGI Bénin](https://www.impots.finances.gouv.bj)
 
-### Contributing
-Contributions are welcome! Please open an issue or submit a pull request on the GitHub repository.
+### Licence
 
-### License
-This project is licensed under the MIT License. See the LICENSE file for details.
-
-
+MIT — voir le fichier [license](./license).

@@ -1,11 +1,11 @@
-import { getConfig } from './config';
+import {resolveConfig} from './config';
 
-describe('getConfig', () => {
+describe('resolveConfig', () => {
     const originalEnv = process.env;
 
     beforeEach(() => {
         jest.resetModules();
-        process.env = { ...originalEnv };
+        process.env = {...originalEnv};
     });
 
     afterAll(() => {
@@ -16,32 +16,40 @@ describe('getConfig', () => {
         process.env.EMECEF_BASE_URL = 'https://test-api.com/emcf/api';
         process.env.EMECEF_TOKEN = 'test-token';
 
-        const config = getConfig();
+        const config = resolveConfig();
         expect(config).toEqual({
             baseUrl: 'https://test-api.com/emcf/api',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': 'Bearer test-token'
-            }
+            token: 'test-token',
+            timeout: 30_000,
+            retries: 3,
         });
     });
 
-    it('should throw error if EMECEF_BASE_URL is missing', () => {
+    it('should override env variables with explicit config', () => {
+        process.env.EMECEF_BASE_URL = 'https://env-url.com/api';
+        process.env.EMECEF_TOKEN = 'env-token';
+
+        const config = resolveConfig({baseUrl: 'https://explicit-url.com/api', token: 'explicit-token', timeout: 5000});
+        expect(config.baseUrl).toBe('https://explicit-url.com/api');
+        expect(config.token).toBe('explicit-token');
+        expect(config.timeout).toBe(5000);
+    });
+
+    it('should throw error if baseUrl is missing', () => {
         delete process.env.EMECEF_BASE_URL;
         process.env.EMECEF_TOKEN = 'test-token';
-        expect(() => getConfig()).toThrow('EMECEF_BASE_URL environment variable must be provided');
+        expect(() => resolveConfig()).toThrow('baseUrl est requis');
     });
 
-    it('should throw error if EMECEF_TOKEN is missing', () => {
+    it('should throw error if token is missing', () => {
         process.env.EMECEF_BASE_URL = 'https://test-api.com/emcf/api';
         delete process.env.EMECEF_TOKEN;
-        expect(() => getConfig()).toThrow('EMECEF_TOKEN environment variable must be provided');
+        expect(() => resolveConfig()).toThrow('token est requis');
     });
 
-    it('should throw error if EMECEF_BASE_URL is invalid', () => {
+    it('should throw error if baseUrl is invalid', () => {
         process.env.EMECEF_BASE_URL = 'invalid-url';
         process.env.EMECEF_TOKEN = 'test-token';
-        expect(() => getConfig()).toThrow('EMECEF_BASE_URL must be a valid URL');
+        expect(() => resolveConfig()).toThrow('baseUrl doit être une URL valide');
     });
 });

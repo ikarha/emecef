@@ -19,9 +19,9 @@ describe('BillingService', () => {
 
     beforeAll(() => {
         mock = new MockAdapter(axios);
-        process.env.EMECEF_BASE_URL = 'https://test-emecef-api.com/emcf/api/invoice';
+        process.env.EMECEF_BASE_URL = 'https://test-emecef-api.com/emcf/api';
         process.env.EMECEF_TOKEN = 'test-token';
-        billingService = new BillingService();
+        billingService = new BillingService({retries: 0});
     });
 
     afterEach(() => {
@@ -52,7 +52,7 @@ describe('BillingService', () => {
 
         it('should throw an error if the API returns an error', async () => {
             mock.onGet('/').reply(500, {errorCode: '', errorDesc: 'Internal Server Error'});
-            await expect(billingService.getInvoiceStatus()).rejects.toThrow('ITERNAL_SERVER_ERROR : Erreur interne du serveur emecef, veuillez réessayer ultérieurement.');
+            await expect(billingService.getInvoiceStatus()).rejects.toThrow('INTERNAL_SERVER_ERROR : Erreur interne du serveur emecef, veuillez réessayer ultérieurement.');
         });
     })
 
