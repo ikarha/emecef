@@ -210,7 +210,7 @@ dist/         Fichiers compilés (.js + .d.ts)
 
 - [CHANGELOG](./CHANGELOG.md) — historique des versions et guide de migration
 - [API e-MCF — Documentation Swagger](https://developper.impots.bj/sygmef-emcf/swagger/index.html)
-- [DGI Bénin](https://www.impots.finances.gouv.bj)
+- [DGI Bénin](https://e-mecef.impots.bj/)
 
 ### Licence
 
