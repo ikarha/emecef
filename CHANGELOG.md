@@ -13,10 +13,14 @@ versionnage selon [Semantic Versioning](https://semver.org/lang/fr/).
 
 Avant de mettre à jour depuis la v1.0.0, vérifiez les points suivants dans votre code :
 
-- **`emcflist` → `emcfList`** dans `InfoResponseDto` : tout accès à `info.emcflist` doit être renommé en `info.emcfList`.
-- **`finalizeInvoice(uid, 'annuler')`** n'est plus valide : remplacer par `cancelInvoice(uid)` ou `finalizeInvoice(uid, 'cancel')`.
-- **Code d'erreur `ITERNAL_SERVER_ERROR` → `INTERNAL_SERVER_ERROR`** : tout `catch` qui compare `error.details.code` à la chaîne `'ITERNAL_SERVER_ERROR'` doit être mis à jour.
-- **`getConfig()`** retourne maintenant `EmecefConfig` (`{ baseUrl, token, timeout }`) au lieu de `ApiConfig` (`{ baseUrl, headers }`). Si vous utilisiez `getConfig()` directement, passez à `resolveConfig()`.
+- **`emcflist` → `emcfList`** dans `InfoResponseDto` : tout accès à `info.emcflist` doit être renommé en
+  `info.emcfList`.
+- **`finalizeInvoice(uid, 'annuler')`** n'est plus valide : remplacer par `cancelInvoice(uid)` ou
+  `finalizeInvoice(uid, 'cancel')`.
+- **Code d'erreur `ITERNAL_SERVER_ERROR` → `INTERNAL_SERVER_ERROR`** : tout `catch` qui compare `error.details.code` à
+  la chaîne `'ITERNAL_SERVER_ERROR'` doit être mis à jour.
+- **`getConfig()`** retourne maintenant `EmecefConfig` (`{ baseUrl, token, timeout }`) au lieu de `ApiConfig` (
+  `{ baseUrl, headers }`). Si vous utilisiez `getConfig()` directement, passez à `resolveConfig()`.
 
 ### Ajouté
 
@@ -75,6 +79,14 @@ Ces éléments fonctionnent encore, mais seront supprimés en v3 :
 - `dotenv` déplacé de `dependencies` vers `devDependencies`.
 - `"private": true` retiré de `package.json`.
 - URLs du dépôt corrigées (suffixe `.git` parasite supprimé de `bugs.url` et `homepage`).
+- `tsconfig.build.json` ajouté pour exclure les tests et exemples du build de publication.
+- `.npmignore` ajouté comme filet de sécurité supplémentaire.
+- Script `clean` ajouté ; `prepublishOnly` enchaîne désormais `clean → build`.
+
+### Contributeurs de cette version
+
+- [**@ikarha**](https://github.com/ikarha) — Ikarha
+- [**@francoisassogba**](https://github.com/francoisassogba) — François ASSOGBA
 
 ---
 
@@ -94,6 +106,10 @@ Ces éléments fonctionnent encore, mais seront supprimés en v3 :
   et une map de tous les codes d'erreur applicatifs de l'API DGI (codes `1` à `99`).
 - **Configuration via variables d'environnement** — `EMECEF_BASE_URL` et `EMECEF_TOKEN`.
 - **Suite de tests Jest** — couverture des cas nominaux et des cas d'erreur pour les deux services.
+
+### Contributeur de cette version
+
+- [**@ikarha**](https://github.com/ikarha) — Ikarha
 
 ---
 

@@ -7,12 +7,13 @@
   "author": "Ologou François-Jean de Dieu ASSOGBA <asjohnfrancis@hotmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "start": "node dist/index.js",
     "run-example": "node dist/examples/example.js",
     "test": "jest",
     "test-coverage": "jest --coverage",
-    "prepublishOnly": "npm run build"
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build"
   },
   "keywords": [
     "e-MCF",
