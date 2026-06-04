@@ -17,7 +17,7 @@ export interface InfoResponseDto {
     nim: string;
     tokenValid: string;
     serverDateTime: string;
-    emcflist: EmcfInfoDto[];
+    emcfList: EmcfInfoDto[];
 }
 
 export interface TaxGroupsDto {

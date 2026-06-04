@@ -12,7 +12,7 @@ describe('InfoService', () => {
         mock = new MockAdapter(axios);
         process.env.EMECEF_BASE_URL = 'https://test-emecef-api.com/emcf/api';
         process.env.EMECEF_TOKEN = 'test-token';
-        infoService = new InfoService();
+        infoService = new InfoService({retries: 0});
     });
 
     afterEach(() => {
@@ -32,7 +32,7 @@ describe('InfoService', () => {
                 nim: 'XX01000070',
                 tokenValid: '2025-12-31T00:00:00+01:00',
                 serverDateTime: '2025-05-27T12:20:00+01:00',
-                emcflist: [
+                emcfList: [
                     {
                         nim: 'XX01000070',
                         status: 'Actif',
